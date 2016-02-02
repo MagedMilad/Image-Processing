@@ -9,8 +9,11 @@
 #include <QPoint>
 #include <QPixmap>
 
+qreal rotation;
+
 CustomView::CustomView(QWidget * parent) : QGraphicsView( parent)
 {
+    rotation = 0.0;
     scene = new QGraphicsScene(this);
     setScene(scene);
     rubberBand = new QRubberBand(QRubberBand::Rectangle , this);
@@ -79,10 +82,12 @@ void CustomView::crop()
 {
     rubberBand->hide();
     QImage copy ;
+    rotate(-1*rotation);
     copy = image->copy(QRect(origin - this->mapFromScene(0,0), endPoint - this->mapFromScene(0,0)));
     //    scene->clear();
     scene = new QGraphicsScene(this);
     setScene(scene);
+    rotate(rotation);
     scene->addPixmap(QPixmap::fromImage(copy));
     //    scene->setSceneRect(0,0,copy.width(),copy.height());
     *image = copy;
@@ -92,6 +97,7 @@ void CustomView::crop()
 
 void CustomView::rotateAccpetSlot(int angle)
 {
+    rotation = angle;
    rotate(angle);
 }
 
