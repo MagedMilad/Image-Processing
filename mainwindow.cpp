@@ -7,12 +7,18 @@
 #include <QMouseEvent>
 #include <QRubberBand>
 #include <QPoint>
+#include "dialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->zoomButton->setEnabled(false);
+    ui->cropButton->setEnabled(false);
+    ui->rotateButton->setEnabled(false);
+    connect(ui->graphicsView,SIGNAL(areaSelected()) , this , SLOT(setEnable()));
+    connect(ui->graphicsView,SIGNAL(enableRotateSignal()) , this , SLOT(enableRotateSlot()));
 
 }
 
@@ -24,38 +30,46 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionOpen_triggered()
 {
     QString imagePath = QFileDialog::getOpenFileName(
-            this,
-            tr("Open File"),
-            "",
-            tr("JPEG (*.jpg *.jpeg);;PNG (*.png)" )
-            );
+                this,
+                tr("Open File"),
+                "",
+                tr("Images (*.png *.bmp *.jpg)" )
+                );
     ui->graphicsView->loadImage(imagePath);
 
-//    image = new QImage();
-//    image->load(imagePath);
-//    scene->clear();
-//    scene->addPixmap(QPixmap::fromImage(*image));
 }
 
-void MainWindow::on_actionRotate_Rigth_triggered()
+void MainWindow::setEnable()
 {
-    ui->graphicsView->rotate(90);
+    if(ui->graphicsView->activeArea){
+        ui->zoomButton->setEnabled(true);
+        ui->cropButton->setEnabled(true);
+    }
+    else{
+        ui->zoomButton->setEnabled(false);
+        ui->cropButton->setEnabled(false);
+    }
 }
 
-void MainWindow::on_actionRotate_Left_triggered()
+void MainWindow::enableRotateSlot()
 {
-    ui->graphicsView->rotate(-90);
+    ui->rotateButton->setEnabled(true);
 }
 
 
+void MainWindow::on_zoomButton_clicked()
+{
+    ui->graphicsView->zoom();
+}
 
+void MainWindow::on_cropButton_clicked()
+{
+    ui->graphicsView->crop();
+}
 
-
-
-
-
-
-
-
-
-
+void MainWindow::on_rotateButton_clicked()
+{
+    Dialog *d = new Dialog(this);
+    connect(d,SIGNAL(rotateAccpetSignal(int)),ui->graphicsView,SLOT(rotateAccpetSlot(int)));
+    d->exec();
+}

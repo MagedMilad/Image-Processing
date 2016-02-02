@@ -16,6 +16,31 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="zoomButton">
+        <property name="text">
+         <string>Zoom</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="rotateButton">
+        <property name="text">
+         <string>Rotate</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="cropButton">
+        <property name="text">
+         <string>Crop</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="CustomView" name="graphicsView"/>
     </item>
    </layout>
@@ -35,29 +60,11 @@
     </property>
     <addaction name="actionOpen"/>
    </widget>
-   <widget class="QMenu" name="menuEdit">
-    <property name="title">
-     <string>Edit</string>
-    </property>
-    <addaction name="actionRotate_Rigth"/>
-    <addaction name="actionRotate_Left"/>
-   </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuEdit"/>
   </widget>
   <action name="actionOpen">
    <property name="text">
     <string>Open</string>
-   </property>
-  </action>
-  <action name="actionRotate_Rigth">
-   <property name="text">
-    <string>Rotate Rigth</string>
-   </property>
-  </action>
-  <action name="actionRotate_Left">
-   <property name="text">
-    <string>Rotate Left</string>
    </property>
   </action>
  </widget>
@@ -69,9 +76,6 @@
    <header>customview.h</header>
   </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>graphicsView</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>

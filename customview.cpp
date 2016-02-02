@@ -14,107 +14,86 @@ CustomView::CustomView(QWidget * parent) : QGraphicsView( parent)
     scene = new QGraphicsScene(this);
     setScene(scene);
     rubberBand = new QRubberBand(QRubberBand::Rectangle , this);
-
+    activeArea = false;
 }
 
 void CustomView::loadImage(QString path)
 {
     image = new QImage();
     image->load(path);
-    scene->clear();
+    scene = new QGraphicsScene(this);
+    setScene(scene);
+    resetTransform();
     scene->addPixmap(QPixmap::fromImage(*image));
+    emit enableRotateSignal();
 }
 
 void CustomView::mousePressEvent(QMouseEvent *event)
 {
-    //      qDebug("1111111111111111");
     if(this->underMouse()){
-        myPoint = event->pos();
-        rubberBand->setGeometry(QRect(myPoint, QSize()));
+        origin = event->pos();
+        rubberBand->setGeometry(QRect(origin, QSize()));
         rubberBand->show();
     }
 }
 
 void CustomView::mouseMoveEvent(QMouseEvent *event)
 {
-    //      qDebug("222222222222222");
-    rubberBand->setGeometry(QRect(myPoint, event->pos()).normalized());
+    rubberBand->setGeometry(QRect(origin, event->pos()).normalized());
+    activeArea = true;
+    emit areaSelected();
 }
 
 void CustomView::mouseReleaseEvent(QMouseEvent *event)
 {
-    //    if (event->button() == Qt::LeftButton) {
-    //        qDebug("33333333333333");
-    //    QRect myRect(myPoint, event->pos());
-
-    //    rubberBand->hide();
-
-    //    QPixmap OriginalPix(*ui->imageLabel->pixmap());
-
-    //    QImage newImage;
-    //    newImage = OriginalPix.toImage();
-
-    //    QImage copyImage;
-    //    copyImage = copyImage.copy(myRect);
-
-    //    ui->imageLabel->setPixmap(QPixmap::fromImage(copyImage));
-    //    ui->imageLabel->repaint();
-    ///////////////////////////////////////////////////
-    QPoint a = mapToGlobal(myPoint);
-    QPoint b = event->globalPos();
-
-    a = this->mapFromGlobal(a);
-    b = this->mapFromGlobal(b);
-
-    QPixmap OriginalPix = QPixmap::fromImage(*image);
-
-
-    //        double sx = this->rect().width();
-    //        double sy = this->rect().height();
-
-    //        sx = OriginalPix.width() / sx;
-    //        sy = OriginalPix.height() / sy;
-
-    //    a.x() = (a.x() * sx);
-    //    b.x() = (b.x() * sx);
-    //    a.y() = (a.y() * sy);
-    //    b.y() = (b.y() * sy);
-
-    a.setX((a.x() + this->rect().x() + OriginalPix.rect().x()));
-    b.setX((b.x()+ this->rect().x() + OriginalPix.rect().x()));
-    a.setY((a.y()+ this->rect().y() + OriginalPix.rect().y()));
-    b.setY((b.y() +this->rect().y() + OriginalPix.rect().y()));
-
-    rubberBand->hide();
-
-    QRect myRect(a, b);
-
-    QImage copy ;
-    copy = image->copy(myRect);
-
-    scene->clear();
-    scene->addPixmap(QPixmap::fromImage(copy));
-
-    *image = copy;
-    /////////////////////////////////////////////////
-    //    rubberBand->hide();
-    //    const QRect & zoomRect = rubberBand->geometry();
-    ////    int xp1, yp1, xp2, yp2;
-    ////    zoomRect.getCoords(&xp1, &yp1, &xp2, &yp2);
-    ////    int x1 = xAxis->pixelToCoord(xp1);
-    ////    int x2 = xAxis->pixelToCoord(xp2);
-    ////    int y1 = yAxis->pixelToCoord(yp1);
-    ////    int y2 = yAxis->pixelToCoord(yp2);
-
-    ////        QRect myRect(new QPoint(x1,y1), new QPoint(x2,y2));
-
-    //        QImage copy ;
-    //        copy = image->copy(zoomRect);
-
-    //        scene->clear();
-    //        scene->addPixmap(QPixmap::fromImage(copy));
-
-    //        *image = copy;
+    origin = rubberBand->mapToParent(QPoint(0,0));
+    endPoint = rubberBand->mapToParent(rubberBand->rect().bottomRight());
 
 }
+
+//void CustomView::wheelEvent(QWheelEvent *event)
+//{
+//    rubberBand->hide();
+//    activeArea = false;
+//    emit areaSelected();
+
+//    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+//    double scaleFactor = 1.15;
+//    if(event->delta() > 0) {
+//        scale(scaleFactor, scaleFactor);
+//    } else {
+
+//        scale(1.0 / scaleFactor, 1.0 / scaleFactor);
+//    }
+//}
+
+void CustomView::zoom()
+{
+    rubberBand->hide();
+    this->fitInView(QRect(origin - this->mapFromScene(0,0), endPoint - this->mapFromScene(0,0)), Qt::KeepAspectRatio);
+    activeArea = false;
+    emit areaSelected();
+}
+
+void CustomView::crop()
+{
+    rubberBand->hide();
+    QImage copy ;
+    copy = image->copy(QRect(origin - this->mapFromScene(0,0), endPoint - this->mapFromScene(0,0)));
+    //    scene->clear();
+    scene = new QGraphicsScene(this);
+    setScene(scene);
+    scene->addPixmap(QPixmap::fromImage(copy));
+    //    scene->setSceneRect(0,0,copy.width(),copy.height());
+    *image = copy;
+    activeArea = false;
+    emit areaSelected();
+}
+
+void CustomView::rotateAccpetSlot(int angle)
+{
+   rotate(angle);
+}
+
+
 

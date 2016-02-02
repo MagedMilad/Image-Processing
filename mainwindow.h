@@ -20,15 +20,19 @@ public:
 private slots:
     void on_actionOpen_triggered();
 
-    void on_actionRotate_Rigth_triggered();
+    void on_zoomButton_clicked();
 
-    void on_actionRotate_Left_triggered();
+    void on_cropButton_clicked();
+
+    void on_rotateButton_clicked();
+
+
 
 private:
     Ui::MainWindow *ui;
-
-
-
+public slots:
+    void setEnable();
+      void enableRotateSlot();
 };
 
 #endif // MAINWINDOW_H
