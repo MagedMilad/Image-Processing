@@ -20,13 +20,19 @@ public:
 private slots:
     void on_actionOpen_triggered();
 
-    void on_zoomButton_clicked();
-
     void on_cropButton_clicked();
 
     void on_rotateButton_clicked();
 
-    void on_pushButton_clicked();
+    void on_reset_clicked();
+
+    void on_zoomIn_clicked();
+
+    void on_zoomOut_clicked();
+
+    void on_undo_clicked();
+
+    void on_redo_clicked();
 
 private:
     Ui::MainWindow *ui;

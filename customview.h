@@ -7,6 +7,7 @@
 #include <QtWidgets>
 #include <QGraphicsScene>
 #include <QRubberBand>
+#include <stack>
 
 class CustomView : public QGraphicsView
 {
@@ -19,8 +20,12 @@ public:
 private:
     QGraphicsScene *scene;
     QImage *image;
+    QImage *originalState;
     QPoint origin , endPoint;
     QRubberBand *rubberBand;
+    std::stack<QImage> undoStack;
+    std::stack<QImage> redoStack;
+    void zoom(qreal factor);
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -34,6 +39,14 @@ public slots:
     void zoomOut();
     void crop();
     void rotateAccpetSlot(int angle);
+    void undo();
+    void redo();
+    void reset();
+    bool undoEmpty();
+    bool redoEmpty();
+    void clearUndo();
+    void clearRedo();
+
 };
 
 #endif // CUSTOMVIEW_H

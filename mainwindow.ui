@@ -18,14 +18,14 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="zoomButton">
+       <widget class="QPushButton" name="zoomIn">
         <property name="text">
          <string>Zoom in</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="zoomOut">
         <property name="text">
          <string>zoom out</string>
         </property>
@@ -42,6 +42,27 @@
        <widget class="QPushButton" name="cropButton">
         <property name="text">
          <string>Crop</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="undo">
+        <property name="text">
+         <string>undo</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="redo">
+        <property name="text">
+         <string>redo</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="reset">
+        <property name="text">
+         <string>reset</string>
         </property>
        </widget>
       </item>

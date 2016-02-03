@@ -9,12 +9,8 @@
 #include <QPoint>
 #include <QPixmap>
 
-
-qreal rotation;
-
 CustomView::CustomView(QWidget * parent) : QGraphicsView( parent)
 {
-    rotation = 0.0;
     scene = new QGraphicsScene(this);
     setScene(scene);
     rubberBand = new QRubberBand(QRubberBand::Rectangle , this);
@@ -25,6 +21,7 @@ void CustomView::loadImage(QString path)
 {
     image = new QImage();
     image->load(path);
+    originalState = new QImage(*image);
     scene = new QGraphicsScene(this);
     setScene(scene);
     resetTransform();
@@ -77,52 +74,48 @@ void CustomView::mouseReleaseEvent(QMouseEvent *event)
 
 void CustomView::zoomIn()
 {
-    rubberBand->hide();
-    QRect rect = rubberBand->geometry().normalized();
-    if (rect.width() > 5 && rect.height() > 5)
-        fitInView(QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight())), Qt::KeepAspectRatio);
-    activeArea = false;
-    emit areaSelected();
+//    rubberBand->hide();
+//    QRect rect = rubberBand->geometry().normalized();
+//    if (rect.width() > 5 && rect.height() > 5)
+//        fitInView(QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight())), Qt::KeepAspectRatio);
+//    activeArea = false;
+//    emit areaSelected();
+     zoom(1.25);
 }
 
 void CustomView::zoomOut()
 {
+    zoom(0.75);
+}
 
-    if(!activeArea){
-        centerOn(QPointF(size().width()/2, size().height()/2));
-    }
-    else{
-        rubberBand->hide();
-        QRect rect = rubberBand->geometry().normalized();
-        QRectF rec =QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight()));
-        centerOn(rec.center());
-    }
-    scale(0.75, 0.75);
+void CustomView::zoom(qreal factor){
+    rubberBand->hide();
+    QRect rect = rubberBand->geometry().normalized();
+    QRectF rec =QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight()));
+    centerOn(rec.center());
+    scale(factor, factor);
     activeArea = false;
     emit areaSelected();
-
 }
 
 void CustomView::crop()
 {
     rubberBand->hide();
     QImage copy ;
-    //rotate(-1*rotation);
     copy = image->copy(QRect(origin - this->mapFromScene(0,0), endPoint - this->mapFromScene(0,0)));
     //    scene->clear();
+    undoStack.push(*new QImage(copy));
     scene = new QGraphicsScene(this);
     setScene(scene);
     scene->addPixmap(QPixmap::fromImage(copy));
     //    scene->setSceneRect(0,0,copy.width(),copy.height());
     *image = copy;
-    //rotate(rotation);
     activeArea = false;
     emit areaSelected();
 }
 
 void CustomView::rotateAccpetSlot(int angle)
 {
-    rotation = angle;
     //   rotate(angle);
     QPoint center = image->rect().center();
     QMatrix matrix;
@@ -136,8 +129,68 @@ void CustomView::rotateAccpetSlot(int angle)
     scene->addPixmap(dstPix);
 
     *image = dstImg;
+}
 
+void CustomView::undo(){
+    QPixmap dstPix = QPixmap::fromImage(undoStack.top());
+
+    scene = new QGraphicsScene(this);
+    setScene(scene);
+    scene->addPixmap(dstPix);
+    image = new QImage(undoStack.top());
+    redoStack.push(*new QImage(undoStack.top()));
+    undoStack.pop();
+
+    rubberBand->hide();
+    activeArea = false;
+    emit areaSelected();
 }
 
 
+void CustomView::redo(){
+    QPixmap dstPix = QPixmap::fromImage(redoStack.top());
 
+    scene = new QGraphicsScene(this);
+    setScene(scene);
+    scene->addPixmap(dstPix);
+    image = new QImage(redoStack.top());
+    undoStack.push(*new QImage(redoStack.top()));
+    redoStack.pop();
+
+    rubberBand->hide();
+    activeArea = false;
+    emit areaSelected();
+}
+
+
+void CustomView::reset(){
+    QPixmap dstPix = QPixmap::fromImage(*originalState);
+    scene = new QGraphicsScene(this);
+    setScene(scene);
+    scene->addPixmap(dstPix);
+    *image = QImage(*originalState);
+
+
+    rubberBand->hide();
+    activeArea = false;
+    emit areaSelected();
+}
+
+
+bool CustomView::undoEmpty(){
+    return undoStack.empty();
+}
+
+bool CustomView::redoEmpty(){
+    return redoStack.empty();
+}
+
+void CustomView::clearUndo(){
+    while(!undoStack.empty())
+        undoStack.pop();
+}
+
+void CustomView::clearRedo(){
+    while(!redoStack.empty())
+        redoStack.pop();
+}
