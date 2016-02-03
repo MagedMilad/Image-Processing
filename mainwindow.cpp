@@ -83,6 +83,8 @@ void MainWindow::on_rotateButton_clicked()
     connect(d,SIGNAL(rotateAccpetSignal(int)),ui->graphicsView,SLOT(rotateAccpetSlot(int)));
     d->exec();
     ui->undo->setEnabled(true);
+    ui->redo->setEnabled(false);
+    ui->graphicsView->clearRedo();
 }
 
 void MainWindow::on_reset_clicked()
@@ -118,4 +120,19 @@ void MainWindow::on_redo_clicked()
         ui->redo->setEnabled(false);
     }
      ui->undo->setEnabled(true);
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    QString imagePath = QFileDialog::getSaveFileName(
+                this,
+                tr("save File"),
+                "",
+                tr("Images (*.png *.bmp *.jpg)" )
+                );
+    //QGraphicsView* view = new QGraphicsView(scene,this);
+    //QString fileName = ".png";
+    QPixmap pixMap = ui->graphicsView->getPix();
+    //QPixmap pixMap = QPixmap::grabWidget(ui->graphicsView->image);
+    pixMap.save(imagePath);
 }

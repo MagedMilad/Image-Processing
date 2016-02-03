@@ -34,6 +34,8 @@ private slots:
 
     void on_redo_clicked();
 
+    void on_actionSave_triggered();
+
 private:
     Ui::MainWindow *ui;
 public slots:

@@ -46,6 +46,7 @@ public slots:
     bool redoEmpty();
     void clearUndo();
     void clearRedo();
+    QPixmap getPix();
 
 };
 

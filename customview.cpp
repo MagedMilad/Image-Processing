@@ -104,7 +104,7 @@ void CustomView::crop()
     QImage copy ;
     copy = image->copy(QRect(origin - this->mapFromScene(0,0), endPoint - this->mapFromScene(0,0)));
     //    scene->clear();
-    undoStack.push(*new QImage(copy));
+    undoStack.push(*new QImage(*image));
     scene = new QGraphicsScene(this);
     setScene(scene);
     scene->addPixmap(QPixmap::fromImage(copy));
@@ -117,6 +117,7 @@ void CustomView::crop()
 void CustomView::rotateAccpetSlot(int angle)
 {
     //   rotate(angle);
+    undoStack.push(*new QImage(*image));
     QPoint center = image->rect().center();
     QMatrix matrix;
     matrix.translate(center.x(), center.y());
@@ -137,8 +138,9 @@ void CustomView::undo(){
     scene = new QGraphicsScene(this);
     setScene(scene);
     scene->addPixmap(dstPix);
-    image = new QImage(undoStack.top());
-    redoStack.push(*new QImage(undoStack.top()));
+
+    redoStack.push(*new QImage(*image));
+    *image = undoStack.top();
     undoStack.pop();
 
     rubberBand->hide();
@@ -153,8 +155,9 @@ void CustomView::redo(){
     scene = new QGraphicsScene(this);
     setScene(scene);
     scene->addPixmap(dstPix);
-    image = new QImage(redoStack.top());
-    undoStack.push(*new QImage(redoStack.top()));
+
+    undoStack.push(*new QImage(*image));
+    *image = redoStack.top();
     redoStack.pop();
 
     rubberBand->hide();
@@ -193,4 +196,8 @@ void CustomView::clearUndo(){
 void CustomView::clearRedo(){
     while(!redoStack.empty())
         redoStack.pop();
+}
+
+QPixmap CustomView::getPix(){
+    return QPixmap::fromImage(*image);
 }
