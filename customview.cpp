@@ -123,7 +123,20 @@ void CustomView::crop()
 void CustomView::rotateAccpetSlot(int angle)
 {
     rotation = angle;
-   rotate(angle);
+    //   rotate(angle);
+    QPoint center = image->rect().center();
+    QMatrix matrix;
+    matrix.translate(center.x(), center.y());
+    matrix.rotate(angle);
+    QImage dstImg = image->transformed(matrix);
+    QPixmap dstPix = QPixmap::fromImage(dstImg);
+
+    scene = new QGraphicsScene(this);
+    setScene(scene);
+    scene->addPixmap(dstPix);
+
+    *image = dstImg;
+
 }
 
 
