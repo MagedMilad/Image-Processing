@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->pushButton->setEnabled(false);
     ui->zoomButton->setEnabled(false);
     ui->cropButton->setEnabled(false);
     ui->rotateButton->setEnabled(false);
@@ -56,13 +57,19 @@ void MainWindow::setEnable()
 
 void MainWindow::enableRotateSlot()
 {
+    ui->pushButton->setEnabled(true);
     ui->rotateButton->setEnabled(true);
 }
 
 
 void MainWindow::on_zoomButton_clicked()
 {
-    ui->graphicsView->zoom();
+    ui->graphicsView->zoomIn();
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    ui->graphicsView->zoomOut();
 }
 
 void MainWindow::on_cropButton_clicked()
@@ -76,3 +83,5 @@ void MainWindow::on_rotateButton_clicked()
     connect(d,SIGNAL(rotateAccpetSignal(int)),ui->graphicsView,SLOT(rotateAccpetSlot(int)));
     d->exec();
 }
+
+

@@ -9,6 +9,7 @@
 #include <QPoint>
 #include <QPixmap>
 
+
 qreal rotation;
 
 CustomView::CustomView(QWidget * parent) : QGraphicsView( parent)
@@ -35,6 +36,7 @@ void CustomView::mousePressEvent(QMouseEvent *event)
 {
     if(this->underMouse()){
         origin = event->pos();
+        //cout << origin.x() << " "<<origin.y() <<endl ;
         rubberBand->setGeometry(QRect(origin, QSize()));
         rubberBand->show();
     }
@@ -51,46 +53,69 @@ void CustomView::mouseReleaseEvent(QMouseEvent *event)
 {
     origin = rubberBand->mapToParent(QPoint(0,0));
     endPoint = rubberBand->mapToParent(rubberBand->rect().bottomRight());
-
+    activeArea = !(abs(origin.x()-endPoint.x()) <= 2 && abs(origin.y()-endPoint.y()) <=2);
+    emit areaSelected();
 }
 
-//void CustomView::wheelEvent(QWheelEvent *event)
+//void CustomView::QWheelEvent(QWheelEvent *event)
 //{
-//    rubberBand->hide();
-//    activeArea = false;
+//    //rubberBand->hide();
+//    //activeArea = false;
 //    emit areaSelected();
 
-//    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-//    double scaleFactor = 1.15;
-//    if(event->delta() > 0) {
-//        scale(scaleFactor, scaleFactor);
-//    } else {
+//    //setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+//    setTransformationAnchor(origin);
 
-//        scale(1.0 / scaleFactor, 1.0 / scaleFactor);
-//    }
+//    double scaleFactor = 1.15;
+//    scale(scaleFactor, scaleFactor);
+////    if(event->delta() > 0) {
+////        scale(scaleFactor, scaleFactor);
+////    } else {
+////        scale(1.0 / scaleFactor, 1.0 / scaleFactor);
+////    }
 //}
 
-void CustomView::zoom()
+void CustomView::zoomIn()
 {
     rubberBand->hide();
-    this->fitInView(QRect(origin - this->mapFromScene(0,0), endPoint - this->mapFromScene(0,0)), Qt::KeepAspectRatio);
+    QRect rect = rubberBand->geometry().normalized();
+    if (rect.width() > 5 && rect.height() > 5)
+        fitInView(QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight())), Qt::KeepAspectRatio);
     activeArea = false;
     emit areaSelected();
+}
+
+void CustomView::zoomOut()
+{
+
+    if(!activeArea){
+        centerOn(QPointF(size().width()/2, size().height()/2));
+    }
+    else{
+        rubberBand->hide();
+        QRect rect = rubberBand->geometry().normalized();
+        QRectF rec =QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight()));
+        centerOn(rec.center());
+    }
+    scale(0.75, 0.75);
+    activeArea = false;
+    emit areaSelected();
+
 }
 
 void CustomView::crop()
 {
     rubberBand->hide();
     QImage copy ;
-    rotate(-1*rotation);
+    //rotate(-1*rotation);
     copy = image->copy(QRect(origin - this->mapFromScene(0,0), endPoint - this->mapFromScene(0,0)));
     //    scene->clear();
     scene = new QGraphicsScene(this);
     setScene(scene);
-    rotate(rotation);
     scene->addPixmap(QPixmap::fromImage(copy));
     //    scene->setSceneRect(0,0,copy.width(),copy.height());
     *image = copy;
+    //rotate(rotation);
     activeArea = false;
     emit areaSelected();
 }

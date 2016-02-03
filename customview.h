@@ -30,7 +30,8 @@ signals:
     void areaSelected();
     void enableRotateSignal();
 public slots:
-    void zoom();
+    void zoomIn();
+    void zoomOut();
     void crop();
     void rotateAccpetSlot(int angle);
 };
