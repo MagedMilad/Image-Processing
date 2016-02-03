@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->rotateButton->setEnabled(false);
     ui->undo->setEnabled(false);
     ui->redo->setEnabled(false);
+    ui->reset->setEnabled(false);
     connect(ui->graphicsView,SIGNAL(areaSelected()) , this , SLOT(setEnable()));
     connect(ui->graphicsView,SIGNAL(enableRotateSignal()) , this , SLOT(enableRotateSlot()));
 
@@ -42,6 +43,7 @@ void MainWindow::on_actionOpen_triggered()
                 tr("Images (*.png *.bmp *.jpg)" )
                 );
     ui->graphicsView->loadImage(imagePath);
+    ui->reset->setEnabled(true);
 
 }
 
