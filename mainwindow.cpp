@@ -7,7 +7,6 @@
 #include <QMouseEvent>
 #include <QRubberBand>
 #include <QPoint>
-#include "dialog.h"
 
 MainWindow::MainWindow(QWidget *parent) :
 
@@ -32,7 +31,7 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-
+// open the image
 void MainWindow::on_actionOpen_triggered()
 {
     QString imagePath = QFileDialog::getOpenFileName(
@@ -70,7 +69,7 @@ void MainWindow::enableRotateSlot()
 }
 
 
-
+// crop action
 void MainWindow::on_cropButton_clicked()
 {
     ui->graphicsView->crop();
@@ -80,11 +79,9 @@ void MainWindow::on_cropButton_clicked()
     ui->graphicsView->clearRedo();
 }
 
+// rotate action
 void MainWindow::on_rotateButton_clicked()
 {
-//    Dialog *d = new Dialog(this);
-//    connect(d,SIGNAL(rotateAccpetSignal(int)),ui->graphicsView,SLOT(rotateAccpetSlot(int)));
-//    d->exec();
 
     ui->graphicsView->rotate(ui->spinBox->value());
     ui->undo->setEnabled(true);
@@ -92,6 +89,7 @@ void MainWindow::on_rotateButton_clicked()
     ui->graphicsView->clearRedo();
 }
 
+// reset action
 void MainWindow::on_reset_clicked()
 {
     ui->graphicsView->reset();
@@ -99,16 +97,19 @@ void MainWindow::on_reset_clicked()
     ui->redo->setEnabled(false);
 }
 
+// zoom in action
 void MainWindow::on_zoomIn_clicked()
 {
     ui->graphicsView->zoomIn();
 }
 
+//zoom out action
 void MainWindow::on_zoomOut_clicked()
 {
     ui->graphicsView->zoomOut();
 }
 
+//undo action
 void MainWindow::on_undo_clicked()
 {
     ui->graphicsView->undo();
@@ -118,6 +119,7 @@ void MainWindow::on_undo_clicked()
     ui->redo->setEnabled(true);
 }
 
+//redo action
 void MainWindow::on_redo_clicked()
 {
     ui->graphicsView->redo();
@@ -127,6 +129,7 @@ void MainWindow::on_redo_clicked()
      ui->undo->setEnabled(true);
 }
 
+//save action
 void MainWindow::on_actionSave_triggered()
 {
     QString imagePath = QFileDialog::getSaveFileName(
@@ -135,14 +138,12 @@ void MainWindow::on_actionSave_triggered()
                 "",
                 tr("Images (*.png *.bmp *.jpg)" )
                 );
-    //QGraphicsView* view = new QGraphicsView(scene,this);
-    //QString fileName = ".png";
+
     if(imagePath.size() == 0){
         return ;
     }
     QPixmap pixMap = ui->graphicsView->getPix();
 
-    //QPixmap pixMap = QPixmap::grabWidget(ui->graphicsView->image);
     pixMap.save(imagePath);
 }
 
@@ -154,4 +155,11 @@ void MainWindow::on_horizontalSlider_sliderMoved(int value)
 void MainWindow::on_spinBox_valueChanged(int value)
 {
  ui->horizontalSlider->setValue(value);
+}
+
+//close action
+void MainWindow::on_actionExit_triggered()
+{
+    close();
+    qApp->quit();
 }

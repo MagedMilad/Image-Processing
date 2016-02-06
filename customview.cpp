@@ -77,12 +77,6 @@ void CustomView::mouseReleaseEvent(QMouseEvent *event)
 
 void CustomView::zoomIn()
 {
-//    rubberBand->hide();
-//    QRect rect = rubberBand->geometry().normalized();
-//    if (rect.width() > 5 && rect.height() > 5)
-//        fitInView(QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight())), Qt::KeepAspectRatio);
-//    activeArea = false;
-//    emit areaSelected();
      zoom(1.25);
 }
 
