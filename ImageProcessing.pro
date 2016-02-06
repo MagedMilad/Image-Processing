@@ -14,12 +14,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    customview.cpp \
-    dialog.cpp
+    customview.cpp
 
 HEADERS  += mainwindow.h \
-    customview.h \
-    dialog.h
+    customview.h
 
-FORMS    += mainwindow.ui \
-    dialog.ui
+FORMS    += mainwindow.ui

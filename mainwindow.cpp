@@ -86,7 +86,7 @@ void MainWindow::on_rotateButton_clicked()
 //    connect(d,SIGNAL(rotateAccpetSignal(int)),ui->graphicsView,SLOT(rotateAccpetSlot(int)));
 //    d->exec();
 
-    ui->graphicsView->rotateAccpetSlot(ui->spinBox->value());
+    ui->graphicsView->rotate(ui->spinBox->value());
     ui->undo->setEnabled(true);
     ui->redo->setEnabled(false);
     ui->graphicsView->clearRedo();

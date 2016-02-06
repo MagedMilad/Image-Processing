@@ -14,26 +14,38 @@ CustomView::CustomView(QWidget * parent) : QGraphicsView( parent)
     scene = new QGraphicsScene(this);
     setScene(scene);
     rubberBand = new QRubberBand(QRubberBand::Rectangle , this);
+
+    //make the background transparent
+    setStyleSheet("background:transparent;");
+    setAttribute(Qt::WA_TranslucentBackground);
+    setWindowFlags(Qt::FramelessWindowHint);
+
     activeArea = false;
     openImage = false;
 }
 
+//load image stored in path into the image variable
 void CustomView::loadImage(QString path)
 {
     image = new QImage();
     image->load(path);
+
     originalState = new QImage(*image);
+
     scene = new QGraphicsScene(this);
     setScene(scene);
     resetTransform();
+
     scene->addPixmap(QPixmap::fromImage(*image));
     emit enableRotateSignal();
 }
 
 void CustomView::mousePressEvent(QMouseEvent *event)
 {
+    //validating that there is an image open
     if(!openImage)
         return;
+
     if(this->underMouse()){
         origin = event->pos();
         rubberBand->setGeometry(QRect(origin, QSize()));
@@ -43,6 +55,7 @@ void CustomView::mousePressEvent(QMouseEvent *event)
 
 void CustomView::mouseMoveEvent(QMouseEvent *event)
 {
+    //validating that there is an image open
     if(!openImage)
         return;
     rubberBand->setGeometry(QRect(origin, event->pos()).normalized());
@@ -52,6 +65,7 @@ void CustomView::mouseMoveEvent(QMouseEvent *event)
 
 void CustomView::mouseReleaseEvent(QMouseEvent *event)
 {
+    //validating that there is an image open
     if(!openImage)
         return;
     origin = rubberBand->mapToParent(QPoint(0,0));
@@ -60,23 +74,6 @@ void CustomView::mouseReleaseEvent(QMouseEvent *event)
     emit areaSelected();
 }
 
-//void CustomView::QWheelEvent(QWheelEvent *event)
-//{
-//    //rubberBand->hide();
-//    //activeArea = false;
-//    emit areaSelected();
-
-//    //setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-//    setTransformationAnchor(origin);
-
-//    double scaleFactor = 1.15;
-//    scale(scaleFactor, scaleFactor);
-////    if(event->delta() > 0) {
-////        scale(scaleFactor, scaleFactor);
-////    } else {
-////        scale(1.0 / scaleFactor, 1.0 / scaleFactor);
-////    }
-//}
 
 void CustomView::zoomIn()
 {
@@ -94,31 +91,20 @@ void CustomView::zoomOut()
     zoom(0.75);
 }
 
+//a unified function for zooming in/out
 void CustomView::zoom(qreal factor){
     rubberBand->hide();
+
     QRect rect = rubberBand->geometry().normalized();
     QRectF rec =QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight()));
+
     centerOn(rec.center());
     scale(factor, factor);
+
     activeArea = false;
     emit areaSelected();
 }
 
-//void CustomView::crop()
-//{
-//    rubberBand->hide();
-//    QImage copy ;
-//    copy = image->copy(QRect(origin - this->mapFromScene(0,0), endPoint - this->mapFromScene(0,0)));
-//    //    scene->clear();
-//    undoStack.push(*new QImage(*image));
-//    scene = new QGraphicsScene(this);
-//    setScene(scene);
-//    scene->addPixmap(QPixmap::fromImage(copy));
-//    //    scene->setSceneRect(0,0,copy.width(),copy.height());
-//    *image = copy;
-//    activeArea = false;
-//    emit areaSelected();
-//}
 
 void CustomView::crop()
 {
@@ -126,20 +112,22 @@ void CustomView::crop()
     QImage copy ;
     QRect rect = rubberBand->geometry().normalized();
     copy = image->copy(QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight())).toRect());
-
+    //save current state in undo stack
     undoStack.push(*new QImage(*image));
+    //show the croped image in the Scene
     scene = new QGraphicsScene(this);
     setScene(scene);
     scene->addPixmap(QPixmap::fromImage(copy));
-    //    scene->setSceneRect(0,0,copy.width(),copy.height());
+    //save the croped image in the image variable
     *image = copy;
+
     activeArea = false;
     emit areaSelected();
 }
 
-void CustomView::rotateAccpetSlot(int angle)
+//a function to rotate the image
+void CustomView::rotate(int angle)
 {
-    //   rotate(angle);
     undoStack.push(*new QImage(*image));
     QPoint center = image->rect().center();
     QMatrix matrix;

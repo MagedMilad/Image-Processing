@@ -39,7 +39,7 @@ public slots:
     void zoomIn();
     void zoomOut();
     void crop();
-    void rotateAccpetSlot(int angle);
+    void rotate(int angle);
     void undo();
     void redo();
     void reset();
