@@ -36,8 +36,13 @@ private slots:
 
     void on_actionSave_triggered();
 
+    void on_horizontalSlider_sliderMoved(int position);
+
+    void on_spinBox_valueChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
+
 public slots:
     void setEnable();
       void enableRotateSlot();

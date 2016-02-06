@@ -15,6 +15,7 @@ CustomView::CustomView(QWidget * parent) : QGraphicsView( parent)
     setScene(scene);
     rubberBand = new QRubberBand(QRubberBand::Rectangle , this);
     activeArea = false;
+    openImage = false;
 }
 
 void CustomView::loadImage(QString path)
@@ -31,9 +32,10 @@ void CustomView::loadImage(QString path)
 
 void CustomView::mousePressEvent(QMouseEvent *event)
 {
+    if(!openImage)
+        return;
     if(this->underMouse()){
         origin = event->pos();
-        //cout << origin.x() << " "<<origin.y() <<endl ;
         rubberBand->setGeometry(QRect(origin, QSize()));
         rubberBand->show();
     }
@@ -41,6 +43,8 @@ void CustomView::mousePressEvent(QMouseEvent *event)
 
 void CustomView::mouseMoveEvent(QMouseEvent *event)
 {
+    if(!openImage)
+        return;
     rubberBand->setGeometry(QRect(origin, event->pos()).normalized());
     activeArea = true;
     emit areaSelected();
@@ -48,6 +52,8 @@ void CustomView::mouseMoveEvent(QMouseEvent *event)
 
 void CustomView::mouseReleaseEvent(QMouseEvent *event)
 {
+    if(!openImage)
+        return;
     origin = rubberBand->mapToParent(QPoint(0,0));
     endPoint = rubberBand->mapToParent(rubberBand->rect().bottomRight());
     activeArea = !(abs(origin.x()-endPoint.x()) <= 2 && abs(origin.y()-endPoint.y()) <=2);
@@ -98,12 +104,29 @@ void CustomView::zoom(qreal factor){
     emit areaSelected();
 }
 
+//void CustomView::crop()
+//{
+//    rubberBand->hide();
+//    QImage copy ;
+//    copy = image->copy(QRect(origin - this->mapFromScene(0,0), endPoint - this->mapFromScene(0,0)));
+//    //    scene->clear();
+//    undoStack.push(*new QImage(*image));
+//    scene = new QGraphicsScene(this);
+//    setScene(scene);
+//    scene->addPixmap(QPixmap::fromImage(copy));
+//    //    scene->setSceneRect(0,0,copy.width(),copy.height());
+//    *image = copy;
+//    activeArea = false;
+//    emit areaSelected();
+//}
+
 void CustomView::crop()
 {
     rubberBand->hide();
     QImage copy ;
-    copy = image->copy(QRect(origin - this->mapFromScene(0,0), endPoint - this->mapFromScene(0,0)));
-    //    scene->clear();
+    QRect rect = rubberBand->geometry().normalized();
+    copy = image->copy(QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight())).toRect());
+
     undoStack.push(*new QImage(*image));
     scene = new QGraphicsScene(this);
     setScene(scene);

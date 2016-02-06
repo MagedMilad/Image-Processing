@@ -17,6 +17,7 @@ public:
     CustomView(QWidget * parent = 0);
     void loadImage(QString path);
     bool activeArea;
+    bool openImage;
 private:
     QGraphicsScene *scene;
     QImage *image;

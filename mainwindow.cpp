@@ -11,8 +11,6 @@
 
 MainWindow::MainWindow(QWidget *parent) :
 
-
-
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -24,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->undo->setEnabled(false);
     ui->redo->setEnabled(false);
     ui->reset->setEnabled(false);
+    ui->actionSave->setEnabled(false);
     connect(ui->graphicsView,SIGNAL(areaSelected()) , this , SLOT(setEnable()));
     connect(ui->graphicsView,SIGNAL(enableRotateSignal()) , this , SLOT(enableRotateSlot()));
 
@@ -42,9 +41,12 @@ void MainWindow::on_actionOpen_triggered()
                 "",
                 tr("Images (*.png *.bmp *.jpg)" )
                 );
+    if(imagePath.size() == 0){
+        return ;
+    }
+    ui->graphicsView->openImage = true;
     ui->graphicsView->loadImage(imagePath);
     ui->reset->setEnabled(true);
-
 }
 
 void MainWindow::setEnable()
@@ -64,6 +66,7 @@ void MainWindow::setEnable()
 void MainWindow::enableRotateSlot()
 {
     ui->rotateButton->setEnabled(true);
+    ui->actionSave->setEnabled(true);
 }
 
 
@@ -79,9 +82,11 @@ void MainWindow::on_cropButton_clicked()
 
 void MainWindow::on_rotateButton_clicked()
 {
-    Dialog *d = new Dialog(this);
-    connect(d,SIGNAL(rotateAccpetSignal(int)),ui->graphicsView,SLOT(rotateAccpetSlot(int)));
-    d->exec();
+//    Dialog *d = new Dialog(this);
+//    connect(d,SIGNAL(rotateAccpetSignal(int)),ui->graphicsView,SLOT(rotateAccpetSlot(int)));
+//    d->exec();
+
+    ui->graphicsView->rotateAccpetSlot(ui->spinBox->value());
     ui->undo->setEnabled(true);
     ui->redo->setEnabled(false);
     ui->graphicsView->clearRedo();
@@ -132,7 +137,21 @@ void MainWindow::on_actionSave_triggered()
                 );
     //QGraphicsView* view = new QGraphicsView(scene,this);
     //QString fileName = ".png";
+    if(imagePath.size() == 0){
+        return ;
+    }
     QPixmap pixMap = ui->graphicsView->getPix();
+
     //QPixmap pixMap = QPixmap::grabWidget(ui->graphicsView->image);
     pixMap.save(imagePath);
+}
+
+void MainWindow::on_horizontalSlider_sliderMoved(int value)
+{
+    ui->spinBox->setValue(value);
+}
+
+void MainWindow::on_spinBox_valueChanged(int value)
+{
+ ui->horizontalSlider->setValue(value);
 }
