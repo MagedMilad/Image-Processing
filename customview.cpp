@@ -119,7 +119,10 @@ void CustomView::crop()
     QRect rect = rubberBand->geometry().normalized();
     copy = image->copy(QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight())).toRect());
     //save current state in undo stack
-    undoStack.push(*new QImage(*image));
+    undoStack.push_front(*new QImage(*image));
+    if(undoStack.size() > 5){
+        undoStack.pop_back();
+    }
     //show the croped image in the Scene
     scene = new QGraphicsScene(this);
     setScene(scene);
@@ -134,7 +137,10 @@ void CustomView::crop()
 //a function to rotate the image
 void CustomView::rotate(int angle)
 {
-    undoStack.push(*new QImage(*image));
+    undoStack.push_front(*new QImage(*image));
+    if(undoStack.size() > 5){
+        undoStack.pop_back();
+    }
     QPoint center = image->rect().center();
     QMatrix matrix;
     matrix.translate(center.x(), center.y());
@@ -163,7 +169,10 @@ void CustomView::scale(double scalex, double scaley)
     */
     QImage dstImg;
     try {
-        undoStack.push(*new QImage(*image));
+        undoStack.push_front(*new QImage(*image));
+        if(undoStack.size() > 5){
+            undoStack.pop_back();
+        }
         QPoint center = image->rect().center();
         QMatrix matrix;
         matrix.translate(center.x(), center.y());
@@ -186,15 +195,18 @@ void CustomView::scale(double scalex, double scaley)
 }
 
 void CustomView::undo(){
-    QPixmap dstPix = QPixmap::fromImage(undoStack.top());
+    QPixmap dstPix = QPixmap::fromImage(*undoStack.begin());
 
     scene = new QGraphicsScene(this);
     setScene(scene);
     scene->addPixmap(dstPix);
 
-    redoStack.push(*new QImage(*image));
-    *image = undoStack.top();
-    undoStack.pop();
+    redoStack.push_front(*new QImage(*image));
+    if(redoStack.size() > 5){
+        redoStack.pop_back();
+    }
+    *image = *undoStack.begin();
+    undoStack.pop_front();
 
     rubberBand->hide();
     activeArea = false;
@@ -203,15 +215,18 @@ void CustomView::undo(){
 
 
 void CustomView::redo(){
-    QPixmap dstPix = QPixmap::fromImage(redoStack.top());
+    QPixmap dstPix = QPixmap::fromImage(*redoStack.begin());
 
     scene = new QGraphicsScene(this);
     setScene(scene);
     scene->addPixmap(dstPix);
 
-    undoStack.push(*new QImage(*image));
-    *image = redoStack.top();
-    redoStack.pop();
+    undoStack.push_front(*new QImage(*image));
+    if(undoStack.size() > 5){
+        undoStack.pop_back();
+    }
+    *image = *redoStack.begin();
+    redoStack.pop_front();
 
     rubberBand->hide();
     activeArea = false;
@@ -243,12 +258,12 @@ bool CustomView::redoEmpty(){
 
 void CustomView::clearUndo(){
     while(!undoStack.empty())
-        undoStack.pop();
+        undoStack.pop_back();
 }
 
 void CustomView::clearRedo(){
     while(!redoStack.empty())
-        redoStack.pop();
+        redoStack.pop_back();
 }
 
 QPixmap CustomView::getPix(){

@@ -24,8 +24,8 @@ private:
     QImage *originalState;
     QPoint origin , endPoint;
     QRubberBand *rubberBand;
-    std::stack<QImage> undoStack;
-    std::stack<QImage> redoStack;
+    std::deque<QImage> undoStack;
+    std::deque<QImage> redoStack;
     void zoom(qreal factor);
 protected:
     void mousePressEvent(QMouseEvent *event);
