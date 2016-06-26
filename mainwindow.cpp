@@ -18,12 +18,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->zoomIn->setEnabled(false);
     ui->cropButton->setEnabled(false);
     ui->rotateButton->setEnabled(false);
+    ui->rotateButton_3->setEnabled(false);
     ui->undo->setEnabled(false);
     ui->redo->setEnabled(false);
     ui->reset->setEnabled(false);
     ui->actionSave->setEnabled(false);
     connect(ui->graphicsView,SIGNAL(areaSelected()) , this , SLOT(setEnable()));
     connect(ui->graphicsView,SIGNAL(enableRotateSignal()) , this , SLOT(enableRotateSlot()));
+
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_C), this, SLOT(on_cropButton_clicked()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Plus), this, SLOT(on_zoomIn_clicked()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus), this, SLOT(on_zoomOut_clicked()));
+
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z), this, SLOT(on_undo_clicked()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_Y), this, SLOT(on_redo_clicked()));
+    new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_R), this, SLOT(on_reset_clicked()));
+
 
 }
 
@@ -69,28 +79,28 @@ void MainWindow::enableRotateSlot()
 {
     ui->rotateButton->setEnabled(true);
     ui->actionSave->setEnabled(true);
+    ui->rotateButton_3->setEnabled(true);
 }
 
 
 // crop action
 void MainWindow::on_cropButton_clicked()
 {
-    ui->graphicsView->crop();
-
-    ui->undo->setEnabled(true);
-    ui->redo->setEnabled(false);
-    ui->graphicsView->clearRedo();
+    if(ui->graphicsView->activeArea){
+        ui->graphicsView->crop();
+        ui->undo->setEnabled(true);
+        ui->redo->setEnabled(false);
+        ui->graphicsView->clearRedo();
+    }
 }
 
 // rotate action
 void MainWindow::on_rotateButton_clicked()
 {
-
-    ui->graphicsView->rotate(ui->spinBox->value());
-    ui->undo->setEnabled(true);
-    ui->redo->setEnabled(false);
-    ui->graphicsView->clearRedo();
-
+        ui->graphicsView->rotate(ui->spinBox->value());
+        ui->undo->setEnabled(true);
+        ui->redo->setEnabled(false);
+        ui->graphicsView->clearRedo();
 }
 
 // reset action
@@ -104,33 +114,42 @@ void MainWindow::on_reset_clicked()
 // zoom in action
 void MainWindow::on_zoomIn_clicked()
 {
-    ui->graphicsView->zoomIn();
+    if(ui->graphicsView->activeArea){
+        ui->graphicsView->zoomIn();
+    }
 }
 
 //zoom out action
 void MainWindow::on_zoomOut_clicked()
 {
-    ui->graphicsView->zoomOut();
+    if(ui->graphicsView->activeArea){
+        ui->graphicsView->zoomOut();
+    }
 }
+
 
 //undo action
 void MainWindow::on_undo_clicked()
 {
-    ui->graphicsView->undo();
-    if(ui->graphicsView->undoEmpty()){
-        ui->undo->setEnabled(false);
+    if(!ui->graphicsView->undoEmpty()){
+        ui->graphicsView->undo();
+        if(ui->graphicsView->undoEmpty()){
+            ui->undo->setEnabled(false);
+        }
+        ui->redo->setEnabled(true);
     }
-    ui->redo->setEnabled(true);
 }
 
 //redo action
 void MainWindow::on_redo_clicked()
 {
-    ui->graphicsView->redo();
-    if(ui->graphicsView->redoEmpty()){
-        ui->redo->setEnabled(false);
+    if(!ui->graphicsView->redoEmpty()){
+        ui->graphicsView->redo();
+        if(ui->graphicsView->redoEmpty()){
+            ui->redo->setEnabled(false);
+        }
+         ui->undo->setEnabled(true);
     }
-     ui->undo->setEnabled(true);
 }
 
 //save action
@@ -206,7 +225,7 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_rotateButton_3_clicked()
 {
-    ui->graphicsView->scale(ui->spinBox_3->value(), ui->spinBox_4->value());
+    ui->graphicsView->mScale(ui->spinBox_3->value(), ui->spinBox_4->value());
     ui->undo->setEnabled(true);
     ui->redo->setEnabled(false);
     ui->graphicsView->clearRedo();

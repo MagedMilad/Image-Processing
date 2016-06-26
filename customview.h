@@ -40,7 +40,7 @@ public slots:
     void zoomOut();
     void crop();
     void rotate(int angle);
-    void scale(double scalex, double scaley);
+    void mScale(double scalex, double scaley);
     void undo();
     void redo();
     void reset();

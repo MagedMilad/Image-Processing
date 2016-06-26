@@ -156,7 +156,7 @@ void CustomView::rotate(int angle)
 }
 
 //TODO add scale code into action
-void CustomView::scale(double scalex, double scaley)
+void CustomView::mScale(double scalex, double scaley)
 {
     /*
     QImage img(name);
@@ -190,6 +190,7 @@ void CustomView::scale(double scalex, double scaley)
     scene = new QGraphicsScene(this);
     setScene(scene);
     scene->addPixmap(dstPix);
+
 
     *image = dstImg;
 }
@@ -240,7 +241,7 @@ void CustomView::reset(){
     setScene(scene);
     scene->addPixmap(dstPix);
     *image = QImage(*originalState);
-
+    resetTransform();
 
     rubberBand->hide();
     activeArea = false;
