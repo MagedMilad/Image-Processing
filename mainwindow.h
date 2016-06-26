@@ -42,6 +42,8 @@ private slots:
 
     void on_actionExit_triggered();
 
+    void on_rotateButton_3_clicked();
+
 private:
     Ui::MainWindow *ui;
 

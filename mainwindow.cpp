@@ -43,9 +43,12 @@ void MainWindow::on_actionOpen_triggered()
     if(imagePath.size() == 0){
         return ;
     }
-    ui->graphicsView->openImage = true;
-    ui->graphicsView->loadImage(imagePath);
-    ui->reset->setEnabled(true);
+   if(ui->graphicsView->loadImage(imagePath)){
+       ui->graphicsView->openImage = true;
+       ui->reset->setEnabled(true);
+   }
+
+
 }
 
 void MainWindow::setEnable()
@@ -87,6 +90,7 @@ void MainWindow::on_rotateButton_clicked()
     ui->undo->setEnabled(true);
     ui->redo->setEnabled(false);
     ui->graphicsView->clearRedo();
+
 }
 
 // reset action
@@ -130,22 +134,58 @@ void MainWindow::on_redo_clicked()
 }
 
 //save action
+//void MainWindow::on_actionSave_triggered()
+//{
+//    QString imagePath = QFileDialog::getSaveFileName(
+//                this,
+//                tr("save File"),
+//                "",
+//                tr("Images (*.png *.bmp *.jpg)" )
+//                );
+
+//    if(imagePath.size() == 0){
+//        return ;
+//    }
+//    QPixmap pixMap = ui->graphicsView->getPix();
+
+//    pixMap.save(imagePath);
+//}
 void MainWindow::on_actionSave_triggered()
 {
-    QString imagePath = QFileDialog::getSaveFileName(
-                this,
-                tr("save File"),
-                "",
-                tr("Images (*.png *.bmp *.jpg)" )
-                );
+    if(!ui->graphicsView->openImage)
+        return;
 
-    if(imagePath.size() == 0){
-        return ;
+    QFileDialog dialog(this);
+    dialog.setViewMode(QFileDialog::Detail);
+
+    QString fileName = QFileDialog::getSaveFileName(this ,"Save file", QDir::currentPath(),"All files (*)" ,
+                                                    new QString("Text files (*.txt)"));
+    char const *format;
+    if(fileName.size() >= 4)
+    {
+        QString last = fileName.right(4).toUpper();
+        if(last == ".JPG")
+            format = "JPG";
+
+        else if(last == ".BMP")
+            format = "BMP";
+
+        else
+        {
+            fileName += ".png";
+            format = "PNG";
+        }
     }
-    QPixmap pixMap = ui->graphicsView->getPix();
+    else{
+        fileName += ".png";
+        format = "PNG";
+    }
+        QPixmap pixMap = ui->graphicsView->getPix();
 
-    pixMap.save(imagePath);
+        pixMap.save(fileName,format);
 }
+
+
 
 void MainWindow::on_horizontalSlider_sliderMoved(int value)
 {
@@ -162,4 +202,12 @@ void MainWindow::on_actionExit_triggered()
 {
     close();
     qApp->quit();
+}
+
+void MainWindow::on_rotateButton_3_clicked()
+{
+    ui->graphicsView->scale(ui->spinBox_3->value(), ui->spinBox_4->value());
+    ui->undo->setEnabled(true);
+    ui->redo->setEnabled(false);
+    ui->graphicsView->clearRedo();
 }

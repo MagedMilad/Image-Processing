@@ -25,11 +25,16 @@ CustomView::CustomView(QWidget * parent) : QGraphicsView( parent)
 }
 
 //load image stored in path into the image variable
-void CustomView::loadImage(QString path)
+bool CustomView::loadImage(QString path)
 {
     image = new QImage();
     image->load(path);
-
+    if(image->isNull()){
+        QMessageBox messageBox;
+        messageBox.critical(0,"Error","Not Supported Image");
+        messageBox.setFixedSize(500,200);
+        return false;
+    }
     originalState = new QImage(*image);
 
     scene = new QGraphicsScene(this);
@@ -38,6 +43,7 @@ void CustomView::loadImage(QString path)
 
     scene->addPixmap(QPixmap::fromImage(*image));
     emit enableRotateSignal();
+    return true;
 }
 
 void CustomView::mousePressEvent(QMouseEvent *event)
@@ -63,7 +69,7 @@ void CustomView::mouseMoveEvent(QMouseEvent *event)
     emit areaSelected();
 }
 
-void CustomView::mouseReleaseEvent(QMouseEvent *event)
+void CustomView::mouseReleaseEvent(QMouseEvent *)
 {
     //validating that there is an image open
     if(!openImage)
@@ -77,7 +83,13 @@ void CustomView::mouseReleaseEvent(QMouseEvent *event)
 
 void CustomView::zoomIn()
 {
-     zoom(1.25);
+    rubberBand->hide();
+    QRect rect = rubberBand->geometry().normalized();
+    if (rect.width() > 5 && rect.height() > 5)
+        fitInView(QRectF(mapToScene(rect.topLeft()), mapToScene(rect.bottomRight())), Qt::KeepAspectRatio);
+    activeArea = false;
+    emit areaSelected();
+   // zoom(1.25);
 }
 
 void CustomView::zoomOut()
@@ -95,8 +107,8 @@ void CustomView::zoom(qreal factor){
     centerOn(rec.center());
     scale(factor, factor);
 
-    activeArea = false;
-    emit areaSelected();
+     activeArea = false;
+      emit areaSelected();
 }
 
 
@@ -128,6 +140,42 @@ void CustomView::rotate(int angle)
     matrix.translate(center.x(), center.y());
     matrix.rotate(angle);
     QImage dstImg = image->transformed(matrix);
+    QPixmap dstPix = QPixmap::fromImage(dstImg);
+
+    scene = new QGraphicsScene(this);
+    setScene(scene);
+    scene->addPixmap(dstPix);
+
+    *image = dstImg;
+}
+
+//TODO add scale code into action
+void CustomView::scale(double scalex, double scaley)
+{
+    /*
+    QImage img(name);
+    QPixmap pixmap;
+    pixmap = pixmap.fromImage(img.scaled(width,height,Qt::IgnoreAspectRatio,Qt::SmoothTransformation));
+    QFile file(folder+"/"+name);
+    file.open(QIODevice::WriteOnly);
+    pixmap.save(&file, "jpeg",100);
+    file.close();
+    */
+    QImage dstImg;
+    try {
+        undoStack.push(*new QImage(*image));
+        QPoint center = image->rect().center();
+        QMatrix matrix;
+        matrix.translate(center.x(), center.y());
+        matrix.scale(scalex/100, scaley/100);
+
+        dstImg = image->transformed(matrix  ,Qt::SmoothTransformation);
+    } catch (...) {
+        QMessageBox messageBox;
+        messageBox.critical(0,"Error","very large image result");
+        messageBox.setFixedSize(500,200);
+        return ;
+    }
     QPixmap dstPix = QPixmap::fromImage(dstImg);
 
     scene = new QGraphicsScene(this);

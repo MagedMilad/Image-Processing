@@ -15,7 +15,7 @@ class CustomView : public QGraphicsView
 
 public:
     CustomView(QWidget * parent = 0);
-    void loadImage(QString path);
+    bool loadImage(QString path);
     bool activeArea;
     bool openImage;
 private:
@@ -30,7 +30,7 @@ private:
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *);
 //    void wheelEvent(QWheelEvent * event);
 signals:
     void areaSelected();
@@ -40,6 +40,7 @@ public slots:
     void zoomOut();
     void crop();
     void rotate(int angle);
+    void scale(double scalex, double scaley);
     void undo();
     void redo();
     void reset();
