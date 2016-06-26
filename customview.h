@@ -18,10 +18,15 @@ public:
     bool loadImage(QString path);
     bool activeArea;
     bool openImage;
+
+    int rotationAngle;
+
+
 private:
     QGraphicsScene *scene;
     QImage *image;
     QImage *originalState;
+    QImage *rotated;
     QPoint origin , endPoint;
     QRubberBand *rubberBand;
     std::deque<QImage> undoStack;

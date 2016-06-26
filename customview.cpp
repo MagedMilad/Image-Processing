@@ -22,6 +22,8 @@ CustomView::CustomView(QWidget * parent) : QGraphicsView( parent)
 
     activeArea = false;
     openImage = false;
+    rotated = new QImage();
+    rotationAngle = 0;
 }
 
 //load image stored in path into the image variable
@@ -43,6 +45,8 @@ bool CustomView::loadImage(QString path)
 
     scene->addPixmap(QPixmap::fromImage(*image));
     emit enableRotateSignal();
+    rotated = new QImage();
+    rotationAngle = 0;
     return true;
 }
 
@@ -131,6 +135,8 @@ void CustomView::crop()
     *image = copy;
 
     activeArea = false;
+    rotated = new QImage();
+    rotationAngle = 0;
     emit areaSelected();
 }
 
@@ -141,18 +147,42 @@ void CustomView::rotate(int angle)
     if(undoStack.size() > 5){
         undoStack.pop_back();
     }
-    QPoint center = image->rect().center();
-    QMatrix matrix;
-    matrix.translate(center.x(), center.y());
-    matrix.rotate(angle);
-    QImage dstImg = image->transformed(matrix);
-    QPixmap dstPix = QPixmap::fromImage(dstImg);
 
-    scene = new QGraphicsScene(this);
-    setScene(scene);
-    scene->addPixmap(dstPix);
+    if(!rotated->isNull()){
+        QPoint center = rotated->rect().center();
+        QMatrix matrix;
+        matrix.translate(center.x(), center.y());
+        matrix.rotate(angle+rotationAngle);
 
-    *image = dstImg;
+        rotationAngle += angle;
+
+        QImage dstImg = rotated->transformed(matrix);
+        QPixmap dstPix = QPixmap::fromImage(dstImg);
+
+        scene = new QGraphicsScene(this);
+        setScene(scene);
+        scene->addPixmap(dstPix);
+
+        *image = dstImg;
+    }
+    else{
+        QPoint center = image->rect().center();
+        QMatrix matrix;
+        matrix.translate(center.x(), center.y());
+        matrix.rotate(angle);
+
+        *rotated = *image;
+        rotationAngle = angle;
+
+        QImage dstImg = image->transformed(matrix);
+        QPixmap dstPix = QPixmap::fromImage(dstImg);
+
+        scene = new QGraphicsScene(this);
+        setScene(scene);
+        scene->addPixmap(dstPix);
+
+        *image = dstImg;
+    }
 }
 
 //TODO add scale code into action
@@ -191,7 +221,8 @@ void CustomView::mScale(double scalex, double scaley)
     setScene(scene);
     scene->addPixmap(dstPix);
 
-
+    rotated = new QImage();
+    rotationAngle = 0;
     *image = dstImg;
 }
 
@@ -211,6 +242,8 @@ void CustomView::undo(){
 
     rubberBand->hide();
     activeArea = false;
+    rotated = new QImage();
+    rotationAngle = 0;
     emit areaSelected();
 }
 
@@ -231,6 +264,8 @@ void CustomView::redo(){
 
     rubberBand->hide();
     activeArea = false;
+    rotated = new QImage();
+    rotationAngle = 0;
     emit areaSelected();
 }
 
@@ -243,6 +278,8 @@ void CustomView::reset(){
     *image = QImage(*originalState);
     resetTransform();
 
+    rotated = new QImage();
+    rotationAngle = 0;
     rubberBand->hide();
     activeArea = false;
     emit areaSelected();
