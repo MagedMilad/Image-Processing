@@ -53,11 +53,14 @@ void MainWindow::on_actionOpen_triggered()
     if(imagePath.size() == 0){
         return ;
     }
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QApplication::processEvents();
    if(ui->graphicsView->loadImage(imagePath)){
        ui->graphicsView->openImage = true;
        ui->reset->setEnabled(true);
    }
-
+   QApplication::restoreOverrideCursor();
+   QApplication::processEvents();
 
 }
 
@@ -87,35 +90,51 @@ void MainWindow::enableRotateSlot()
 void MainWindow::on_cropButton_clicked()
 {
     if(ui->graphicsView->activeArea){
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QApplication::processEvents();
         ui->graphicsView->crop();
         ui->undo->setEnabled(true);
         ui->redo->setEnabled(false);
         ui->graphicsView->clearRedo();
+        QApplication::restoreOverrideCursor();
+        QApplication::processEvents();
     }
 }
 
 // rotate action
 void MainWindow::on_rotateButton_clicked()
 {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QApplication::processEvents();
         ui->graphicsView->rotate(ui->spinBox->value());
         ui->undo->setEnabled(true);
         ui->redo->setEnabled(false);
         ui->graphicsView->clearRedo();
+        QApplication::restoreOverrideCursor();
+        QApplication::processEvents();
 }
 
 // reset action
 void MainWindow::on_reset_clicked()
 {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QApplication::processEvents();
     ui->graphicsView->reset();
     ui->undo->setEnabled(false);
     ui->redo->setEnabled(false);
+    QApplication::restoreOverrideCursor();
+    QApplication::processEvents();
 }
 
 // zoom in action
 void MainWindow::on_zoomIn_clicked()
 {
     if(ui->graphicsView->activeArea){
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QApplication::processEvents();
         ui->graphicsView->zoomIn();
+        QApplication::restoreOverrideCursor();
+        QApplication::processEvents();
     }
 }
 
@@ -123,7 +142,11 @@ void MainWindow::on_zoomIn_clicked()
 void MainWindow::on_zoomOut_clicked()
 {
     if(ui->graphicsView->activeArea){
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QApplication::processEvents();
         ui->graphicsView->zoomOut();
+        QApplication::restoreOverrideCursor();
+        QApplication::processEvents();
     }
 }
 
@@ -132,11 +155,15 @@ void MainWindow::on_zoomOut_clicked()
 void MainWindow::on_undo_clicked()
 {
     if(!ui->graphicsView->undoEmpty()){
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QApplication::processEvents();
         ui->graphicsView->undo();
         if(ui->graphicsView->undoEmpty()){
             ui->undo->setEnabled(false);
         }
         ui->redo->setEnabled(true);
+        QApplication::restoreOverrideCursor();
+        QApplication::processEvents();
     }
 }
 
@@ -144,11 +171,15 @@ void MainWindow::on_undo_clicked()
 void MainWindow::on_redo_clicked()
 {
     if(!ui->graphicsView->redoEmpty()){
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        QApplication::processEvents();
         ui->graphicsView->redo();
         if(ui->graphicsView->redoEmpty()){
             ui->redo->setEnabled(false);
         }
          ui->undo->setEnabled(true);
+         QApplication::restoreOverrideCursor();
+         QApplication::processEvents();
     }
 }
 
@@ -199,9 +230,13 @@ void MainWindow::on_actionSave_triggered()
         fileName += ".png";
         format = "PNG";
     }
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QApplication::processEvents();
         QPixmap pixMap = ui->graphicsView->getPix();
 
         pixMap.save(fileName,format);
+        QApplication::restoreOverrideCursor();
+        QApplication::processEvents();
 }
 
 
@@ -225,8 +260,43 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_rotateButton_3_clicked()
 {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    QApplication::processEvents();
     ui->graphicsView->mScale(ui->spinBox_3->value(), ui->spinBox_4->value());
     ui->undo->setEnabled(true);
     ui->redo->setEnabled(false);
     ui->graphicsView->clearRedo();
+    QApplication::restoreOverrideCursor();
+    QApplication::processEvents();
+}
+
+void MainWindow::on_checkBox_stateChanged(int checked)
+{
+    if(checked){
+        ui->spinBox_3->setValue(ui->spinBox_4->value());
+    }
+}
+
+void MainWindow::on_spinBox_4_editingFinished()
+{
+
+}
+
+void MainWindow::on_spinBox_3_editingFinished()
+{
+
+}
+
+void MainWindow::on_spinBox_4_valueChanged(int)
+{
+    if(ui->checkBox->isChecked()){
+        ui->spinBox_3->setValue(ui->spinBox_4->value());
+    }
+}
+
+void MainWindow::on_spinBox_3_valueChanged(int)
+{
+    if(ui->checkBox->isChecked()){
+        ui->spinBox_4->setValue(ui->spinBox_3->value());
+    }
 }
